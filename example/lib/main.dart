@@ -46,7 +46,7 @@ class _HomePageState extends State<HomePage> {
       ),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             TutorialItem(
               key: firstKey,
@@ -89,8 +89,13 @@ class _HomePageState extends State<HomePage> {
                 [TutorialItemMessage(targetKey: firstKey, message: 'This is a first item')],
                 [TutorialItemMessage(targetKey: secondKey, foregroundColor: Colors.white, message: 'This is a second item')],
                 [
-                  TutorialItemMessage(targetKey: thirdKey, foregroundColor: Colors.white, message: 'this is a third item'),
-                  TutorialItemMessage(targetKey: fourthKey, foregroundColor: Colors.red, message: 'this is a fourth item'),
+                  TutorialItemMessage(targetKey: thirdKey, foregroundColor: Colors.white),
+                  TutorialItemMessage(
+                    targetKey: fourthKey,
+                    foregroundColor: Colors.red,
+                    message:
+                        'this is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth item',
+                  ),
                 ],
               ],
             );

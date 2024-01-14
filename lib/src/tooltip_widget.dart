@@ -214,14 +214,16 @@ class _TooltipWidgetState extends State<TooltipWidget> with SingleTickerProvider
     final size = renderBox.size;
     final position = renderBox.localToGlobal(Offset.zero);
     final centerPosition = Offset(position.dx + size.width / 2, position.dy + size.height / 2);
+    final maxWidth = MediaQuery.of(context).size.width - widget.horizontalPadding * 2;
 
     final Widget messageBox = Material(
       type: MaterialType.transparency,
       child: Container(
         key: messageBoxKey,
+        constraints: BoxConstraints(maxWidth: maxWidth),
         padding: messagePadding,
         decoration: messageDecoration,
-        child: RichText(text: TextSpan(text: message ?? '', style: messageStyle)),
+        child: Text(message ?? '', style: messageStyle, softWrap: true, textScaler: TextScaler.noScaling),
       ),
     );
 
@@ -236,8 +238,10 @@ class _TooltipWidgetState extends State<TooltipWidget> with SingleTickerProvider
       followerAnchor = Alignment.topCenter;
     }
 
-    final Size preferredSize = _textSize(message ?? '', messageStyle) + Offset(messagePadding.horizontal, messagePadding.vertical);
-    final double overflowWidth = (preferredSize.width - size.width) / 2;
+    double preferredWidth = _textSize(message ?? '', messageStyle).width + messagePadding.horizontal;
+    if (preferredWidth > maxWidth) preferredWidth = maxWidth;
+
+    final double overflowWidth = (preferredWidth - size.width) / 2;
     double dx;
 
     if (overflowWidth < 0) {
