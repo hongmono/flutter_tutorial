@@ -7,24 +7,34 @@ class Tutorial {
   final BuildContext context;
 
   /// Message Box padding
-  final EdgeInsetsGeometry? messagePadding;
+  ///
+  /// Default: `const EdgeInsets.symmetric(horizontal: 16, vertical: 8)`
+  EdgeInsetsGeometry? messagePadding;
 
   /// Message Box decoration
-  final BoxDecoration? messageDecoration;
+  ///
+  /// Default: `BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8))`
+  BoxDecoration? messageDecoration;
 
   /// Message Box text style
-  final TextStyle? messageStyle;
+  TextStyle? messageStyle;
 
   /// Triangle color
-  final Color? triangleColor;
+  ///
+  /// Default: `Colors.white`
+  Color? triangleColor;
 
-  const Tutorial.of(
-    this.context, {
-    this.messagePadding,
-    this.messageDecoration,
-    this.messageStyle,
-    this.triangleColor,
-  });
+  /// Triangle size
+  ///
+  /// Default: `const Size(7, 5)`
+  Size? triangleSize;
+
+  /// Message Box Padding
+  ///
+  /// Default: `24`
+  double? horizontalPadding;
+
+  Tutorial.of(this.context);
 
   void start(List<List<Message>> messages) {
     Navigator.push(
@@ -33,10 +43,12 @@ class Tutorial {
         builder: (context) {
           return TutorialView(
             messages: messages,
-            messagePadding: messagePadding,
-            messageDecoration: messageDecoration,
-            messageStyle: messageStyle,
-            triangleColor: triangleColor,
+            messagePadding: messagePadding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            messageDecoration: messageDecoration ?? BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8)),
+            messageStyle: messageStyle ?? const TextStyle(color: Colors.black, fontSize: 16),
+            triangleColor: triangleColor ?? Colors.white,
+            triangleSize: triangleSize ?? const Size(7, 5),
+            horizontalPadding: horizontalPadding ?? 24,
           );
         },
       ),

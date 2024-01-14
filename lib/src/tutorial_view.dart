@@ -10,26 +10,34 @@ class TutorialView extends StatefulWidget {
   const TutorialView({
     super.key,
     required this.messages,
-    this.messagePadding,
-    this.messageDecoration,
-    this.messageStyle,
-    this.triangleColor,
+    required this.messagePadding,
+    required this.messageDecoration,
+    required this.messageStyle,
+    required this.triangleColor,
+    required this.triangleSize,
+    required this.horizontalPadding,
   });
 
   /// Messages
   final List<List<Message>> messages;
 
   /// Message Box padding
-  final EdgeInsetsGeometry? messagePadding;
+  final EdgeInsetsGeometry messagePadding;
 
   /// Message Box decoration
-  final BoxDecoration? messageDecoration;
+  final BoxDecoration messageDecoration;
 
   /// Message Box text style
-  final TextStyle? messageStyle;
+  final TextStyle messageStyle;
 
   /// Triangle color
-  final Color? triangleColor;
+  final Color triangleColor;
+
+  /// Triangle size
+  final Size triangleSize;
+
+  /// Message Box Padding
+  final double horizontalPadding;
 
   @override
   State<TutorialView> createState() => _TutorialViewState();
@@ -61,7 +69,6 @@ class _TutorialViewState extends State<TutorialView> {
     final List<Message> message = messages.removeAt(0);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      controller.dismiss();
       controller.show();
     });
 
@@ -131,7 +138,9 @@ class _TutorialViewState extends State<TutorialView> {
         messagePadding: widget.messagePadding,
         messageStyle: widget.messageStyle,
         triangleColor: widget.triangleColor,
+        triangleSize: widget.triangleSize,
         message: message.message,
+        horizontalPadding: widget.horizontalPadding,
         child: child ?? const SizedBox.shrink(),
       ),
     );

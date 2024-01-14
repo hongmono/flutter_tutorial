@@ -46,37 +46,28 @@ class _HomePageState extends State<HomePage> {
       ),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            Tooltip(
-              message: 'This is a first item',
-              child: TutorialItem(
-                key: firstKey,
-                child: const TestWidget(),
-              ),
+            TutorialItem(
+              key: firstKey,
+              child: const TestWidget(),
             ),
             const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Tooltip(
-                  richMessage: const TextSpan(
-                    children: [
-                      TextSpan(text: 'This is a '),
-                      TextSpan(text: 'second', style: TextStyle(color: Colors.green)),
-                      TextSpan(text: ' item'),
-                    ],
-                  ),
-                  child: TutorialItem(
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 0.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TutorialItem(
                     key: thirdKey,
                     child: const TestWidget(),
                   ),
-                ),
-                TutorialItem(
-                  key: fourthKey,
-                  child: const TestWidget(),
-                ),
-              ],
+                  TutorialItem(
+                    key: fourthKey,
+                    child: const TestWidget(),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 20),
             TutorialItem(
@@ -88,22 +79,22 @@ class _HomePageState extends State<HomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Tutorial.of(
-            context,
-            messageDecoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8)),
-            messagePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          ).start(
-            [
-              [TutorialItemMessage(targetKey: firstKey, message: 'This is a first item')],
-              [TutorialItemMessage(targetKey: secondKey, foregroundColor: Colors.white, message: 'This is a second item')],
+          Tutorial.of(context)
+            ..messageDecoration = BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8))
+            ..messagePadding = const EdgeInsets.symmetric(horizontal: 16, vertical: 8)
+            ..triangleSize = const Size(14, 10)
+            ..horizontalPadding = 32
+            ..start(
               [
-                TutorialItemMessage(targetKey: thirdKey, foregroundColor: Colors.white, message: 'this is a third item'),
-                TutorialItemMessage(targetKey: fourthKey, foregroundColor: Colors.red),
+                [TutorialItemMessage(targetKey: firstKey, message: 'This is a first item')],
+                [TutorialItemMessage(targetKey: secondKey, foregroundColor: Colors.white, message: 'This is a second item')],
+                [
+                  TutorialItemMessage(targetKey: thirdKey, foregroundColor: Colors.white, message: 'this is a third item'),
+                  TutorialItemMessage(targetKey: fourthKey, foregroundColor: Colors.red, message: 'this is a fourth item'),
+                ],
               ],
-            ],
-          );
+            );
         },
-        tooltip: 'Increment asdfasfa',
         child: const Icon(Icons.play_arrow),
       ),
     );

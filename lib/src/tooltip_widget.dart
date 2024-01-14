@@ -21,14 +21,16 @@ class TooltipWidget extends StatefulWidget {
     super.key,
     required this.message,
     required this.child,
-    this.triangleColor,
-    this.targetPadding,
+    required this.triangleColor,
+    required this.triangleSize,
+    required this.targetPadding,
     this.onShow,
     this.onDismiss,
     this.controller,
-    this.messagePadding,
-    this.messageDecoration,
-    this.messageStyle,
+    required this.messagePadding,
+    required this.messageDecoration,
+    required this.messageStyle,
+    required this.horizontalPadding,
   });
 
   /// Message
@@ -38,7 +40,10 @@ class TooltipWidget extends StatefulWidget {
   final Widget child;
 
   /// Triangle color
-  final Color? triangleColor;
+  final Color triangleColor;
+
+  /// Triangle size
+  final Size triangleSize;
 
   /// Gap between target and tooltip
   final double? targetPadding;
@@ -53,13 +58,16 @@ class TooltipWidget extends StatefulWidget {
   final TooltipController? controller;
 
   /// Message Box padding
-  final EdgeInsetsGeometry? messagePadding;
+  final EdgeInsetsGeometry messagePadding;
 
   /// Message Box decoration
-  final BoxDecoration? messageDecoration;
+  final BoxDecoration messageDecoration;
 
   /// Message Box text style
-  final TextStyle? messageStyle;
+  final TextStyle messageStyle;
+
+  /// Message Box padding
+  final double horizontalPadding;
 
   @override
   State<TooltipWidget> createState() => _TooltipWidgetState();
@@ -70,6 +78,7 @@ class _TooltipWidgetState extends State<TooltipWidget> with SingleTickerProvider
   late final Animation<double> _animation;
 
   final key = GlobalKey();
+  final messageBoxKey = GlobalKey();
   final LayerLink _layerLink = LayerLink();
   OverlayEntry? _overlayEntry;
 
@@ -78,23 +87,26 @@ class _TooltipWidgetState extends State<TooltipWidget> with SingleTickerProvider
     _animationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
     _animation = CurvedAnimation(parent: _animationController, curve: Curves.easeInOut);
 
-    widget.controller?.addListener(() {
-      if (widget.controller?.isShow == true) {
-        show();
-      } else {
-        dismiss();
-      }
-    });
+    widget.controller?.addListener(listener);
 
     super.initState();
   }
 
   @override
   void dispose() {
+    widget.controller?.removeListener(listener);
     _overlayEntry?.remove();
     _animationController.dispose();
 
     super.dispose();
+  }
+
+  void listener() {
+    if (widget.controller?.isShow == true) {
+      show();
+    } else {
+      dismiss();
+    }
   }
 
   @override
@@ -124,6 +136,11 @@ class _TooltipWidgetState extends State<TooltipWidget> with SingleTickerProvider
       triangleColor: widget.triangleColor,
       message: widget.message,
     );
+
+    if (builder == null) {
+      return;
+    }
+
     targetAnchor = builder.targetAnchor;
     followerAnchor = builder.followerAnchor;
 
@@ -136,12 +153,28 @@ class _TooltipWidgetState extends State<TooltipWidget> with SingleTickerProvider
               link: _layerLink,
               targetAnchor: targetAnchor,
               followerAnchor: followerAnchor,
+              offset: Offset(0, targetAnchor == Alignment.bottomCenter ? widget.targetPadding ?? 0 : -(widget.targetPadding ?? 0)),
               child: FadeTransition(
                 opacity: _animation,
-                child: Padding(
-                  padding: const EdgeInsets.all(2.0),
-                  child: builder.tooltip,
+                child: SizedBox.fromSize(
+                  size: widget.triangleSize,
+                  child: targetAnchor == Alignment.bottomCenter ? const UpperTriangleWidget() : const DownTriangleWidget(),
                 ),
+              ),
+            ),
+            CompositedTransformFollower(
+              link: _layerLink,
+              targetAnchor: targetAnchor,
+              followerAnchor: followerAnchor,
+              offset: Offset(
+                builder.dx,
+                targetAnchor == Alignment.bottomCenter
+                    ? widget.triangleSize.height + (widget.targetPadding ?? 0)
+                    : -widget.triangleSize.height - (widget.targetPadding ?? 0),
+              ),
+              child: FadeTransition(
+                opacity: _animation,
+                child: builder.messageBox,
               ),
             ),
           ],
@@ -156,7 +189,7 @@ class _TooltipWidgetState extends State<TooltipWidget> with SingleTickerProvider
     }
   }
 
-  void dismiss() async {
+  void dismiss() {
     if (_overlayEntry != null) {
       _overlayEntry?.remove();
       _overlayEntry = null;
@@ -164,140 +197,76 @@ class _TooltipWidgetState extends State<TooltipWidget> with SingleTickerProvider
     }
   }
 
-  ({Alignment targetAnchor, Alignment followerAnchor, Widget tooltip}) makeAlignment({
-    EdgeInsetsGeometry? messagePadding,
-    BoxDecoration? messageDecoration,
-    TextStyle? messageStyle,
-    Color? triangleColor,
+  ({Alignment targetAnchor, Alignment followerAnchor, Widget messageBox, double dx})? makeAlignment({
+    required EdgeInsetsGeometry messagePadding,
+    required BoxDecoration messageDecoration,
+    required TextStyle messageStyle,
+    required Color triangleColor,
     String? message = '',
   }) {
-    final renderBox = key.currentContext!.findRenderObject() as RenderBox;
+    final renderBox = key.currentContext?.findRenderObject() as RenderBox?;
+
+    if (renderBox == null) {
+      Exception('RenderBox is null');
+      return null;
+    }
 
     final size = renderBox.size;
     final position = renderBox.localToGlobal(Offset.zero);
     final centerPosition = Offset(position.dx + size.width / 2, position.dy + size.height / 2);
 
-    Alignment targetAnchor;
-    Alignment followerAnchor;
-    Widget tooltip;
-
     final Widget messageBox = Material(
       type: MaterialType.transparency,
       child: Container(
+        key: messageBoxKey,
         padding: messagePadding,
         decoration: messageDecoration,
-        child: Text(message!, style: messageStyle),
+        child: RichText(text: TextSpan(text: message ?? '', style: messageStyle)),
       ),
     );
 
-    if (centerPosition.dy < MediaQuery.of(context).size.height / 2) {
-      if (centerPosition.dx < MediaQuery.of(context).size.width / 3) {
-        followerAnchor = Alignment.topLeft;
-        targetAnchor = Alignment.bottomLeft;
-        tooltip = Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(height: widget.targetPadding ?? 0),
-            Padding(
-              padding: EdgeInsets.only(left: size.width / 2 - 5),
-              child: UpperTriangleWidget(
-                backgroundColor: widget.triangleColor ?? Colors.white,
-              ),
-            ),
-            messageBox,
-          ],
-        );
-      } else if (centerPosition.dx > MediaQuery.of(context).size.width / 3 * 2) {
-        followerAnchor = Alignment.topRight;
-        targetAnchor = Alignment.bottomRight;
-        tooltip = Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            SizedBox(height: widget.targetPadding ?? 0),
-            Padding(
-              padding: EdgeInsets.only(right: size.width / 2 - 5),
-              child: UpperTriangleWidget(
-                backgroundColor: widget.triangleColor ?? Colors.white,
-              ),
-            ),
-            messageBox,
-          ],
-        );
-      } else {
-        followerAnchor = Alignment.topCenter;
-        targetAnchor = Alignment.bottomCenter;
-        tooltip = Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(height: widget.targetPadding ?? 0),
-            UpperTriangleWidget(
-              backgroundColor: widget.triangleColor ?? Colors.white,
-            ),
-            messageBox,
-          ],
-        );
-      }
+    Alignment targetAnchor;
+    Alignment followerAnchor;
+
+    if (centerPosition.dy > MediaQuery.of(context).size.height / 2) {
+      targetAnchor = Alignment.topCenter;
+      followerAnchor = Alignment.bottomCenter;
     } else {
-      if (centerPosition.dx < MediaQuery.of(context).size.width / 3) {
-        targetAnchor = Alignment.topLeft;
-        followerAnchor = Alignment.bottomLeft;
+      targetAnchor = Alignment.bottomCenter;
+      followerAnchor = Alignment.topCenter;
+    }
 
-        tooltip = Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            messageBox,
-            Padding(
-              padding: EdgeInsets.only(left: size.width / 2 - 5),
-              child: DownTriangleWidget(
-                backgroundColor: widget.triangleColor ?? Colors.white,
-              ),
-            ),
-            SizedBox(height: widget.targetPadding ?? 0),
-          ],
-        );
-      } else if (centerPosition.dx > MediaQuery.of(context).size.width / 3 * 2) {
-        followerAnchor = Alignment.bottomRight;
-        targetAnchor = Alignment.topRight;
+    final Size preferredSize = _textSize(message ?? '', messageStyle) + Offset(messagePadding.horizontal, messagePadding.vertical);
+    final double overflowWidth = (preferredSize.width - size.width) / 2;
+    double dx;
 
-        tooltip = Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            messageBox,
-            Padding(
-              padding: EdgeInsets.only(right: size.width / 2 - 5),
-              child: DownTriangleWidget(
-                backgroundColor: widget.triangleColor ?? Colors.white,
-              ),
-            ),
-            SizedBox(height: widget.targetPadding ?? 0),
-          ],
-        );
+    if (overflowWidth < 0) {
+      dx = 0;
+    } else {
+      final edgeFromLeft = position.dx;
+      final edgeFromRight = MediaQuery.of(context).size.width - (position.dx + size.width);
+
+      if (widget.horizontalPadding + edgeFromLeft - overflowWidth < 0) {
+        dx = widget.horizontalPadding + overflowWidth - edgeFromLeft;
+      } else if (widget.horizontalPadding + edgeFromRight - overflowWidth < 0) {
+        dx = edgeFromRight - (overflowWidth + widget.horizontalPadding);
       } else {
-        followerAnchor = Alignment.bottomCenter;
-        targetAnchor = Alignment.topCenter;
-
-        tooltip = Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            messageBox,
-            DownTriangleWidget(
-              backgroundColor: widget.triangleColor ?? Colors.white,
-            ),
-            SizedBox(height: widget.targetPadding ?? 0),
-          ],
-        );
+        dx = 0;
       }
     }
 
     return (
       targetAnchor: targetAnchor,
       followerAnchor: followerAnchor,
-      tooltip: tooltip,
+      messageBox: messageBox,
+      dx: dx,
     );
+  }
+
+  Size _textSize(String text, TextStyle style) {
+    final TextPainter textPainter = TextPainter(text: TextSpan(text: text, style: style), textDirection: TextDirection.ltr)
+      ..layout(minWidth: 0, maxWidth: double.infinity);
+    return textPainter.size;
   }
 }
 
@@ -315,7 +284,6 @@ class UpperTriangleWidget extends StatelessWidget {
       painter: UpperTrianglePainter(
         backgroundColor: backgroundColor,
       ),
-      size: const Size(7, 5), // 원하는 크기 지정
     );
   }
 }
@@ -364,7 +332,6 @@ class DownTriangleWidget extends StatelessWidget {
       painter: DownTrianglePainter(
         backgroundColor: backgroundColor,
       ),
-      size: const Size(7, 5), // 원하는 크기 지정
     );
   }
 }
