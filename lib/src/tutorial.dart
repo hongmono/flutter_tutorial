@@ -26,18 +26,23 @@ class Tutorial {
 
   /// Triangle size
   ///
-  /// Default: `const Size(7, 5)`
+  /// Default: `const Size(10, 10)`
   Size? triangleSize;
 
   /// Message Box Padding
   ///
-  /// Default: `24`
-  double? horizontalPadding;
+  /// Default: `const EdgeInsets.all(24)`
+  EdgeInsetsGeometry? padding;
+
+  /// Axis
+  ///
+  /// Default: `Axis.vertical`
+  Axis? axis;
 
   Tutorial.of(this.context);
 
-  void start(List<List<Message>> messages) {
-    Navigator.push(
+  Future<void> start(List<List<Message>> messages) async {
+    await Navigator.push(
       context,
       HeroDialogRoute(
         builder: (context) {
@@ -47,8 +52,9 @@ class Tutorial {
             messageDecoration: messageDecoration ?? BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8)),
             messageStyle: messageStyle ?? const TextStyle(color: Colors.black, fontSize: 16),
             triangleColor: triangleColor ?? Colors.white,
-            triangleSize: triangleSize ?? const Size(7, 5),
-            horizontalPadding: horizontalPadding ?? 24,
+            triangleSize: triangleSize ?? const Size(10, 10),
+            padding: padding ?? const EdgeInsets.all(24),
+            axis: axis ?? Axis.vertical,
           );
         },
       ),

@@ -46,7 +46,7 @@ class _HomePageState extends State<HomePage> {
       ),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.end,
           children: <Widget>[
             TutorialItem(
               key: firstKey,
@@ -82,19 +82,23 @@ class _HomePageState extends State<HomePage> {
           Tutorial.of(context)
             ..messageDecoration = BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8))
             ..messagePadding = const EdgeInsets.symmetric(horizontal: 16, vertical: 8)
-            ..triangleSize = const Size(14, 10)
-            ..horizontalPadding = 32
+            ..triangleSize = const Size(10, 10)
+            ..padding = const EdgeInsets.all(24)
+            ..axis = Axis.vertical
             ..start(
               [
                 [TutorialItemMessage(targetKey: firstKey, message: 'This is a first item')],
                 [TutorialItemMessage(targetKey: secondKey, foregroundColor: Colors.white, message: 'This is a second item')],
                 [
-                  TutorialItemMessage(targetKey: thirdKey, foregroundColor: Colors.white),
+                  TutorialItemMessage(
+                    targetKey: thirdKey,
+                    foregroundColor: Colors.white,
+                    message:
+                        'this is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth item',
+                  ),
                   TutorialItemMessage(
                     targetKey: fourthKey,
                     foregroundColor: Colors.red,
-                    message:
-                        'this is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth item',
                   ),
                 ],
               ],

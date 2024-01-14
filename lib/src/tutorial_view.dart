@@ -15,7 +15,8 @@ class TutorialView extends StatefulWidget {
     required this.messageStyle,
     required this.triangleColor,
     required this.triangleSize,
-    required this.horizontalPadding,
+    required this.padding,
+    required this.axis,
   });
 
   /// Messages
@@ -37,7 +38,10 @@ class TutorialView extends StatefulWidget {
   final Size triangleSize;
 
   /// Message Box Padding
-  final double horizontalPadding;
+  final EdgeInsetsGeometry padding;
+
+  /// Axis
+  final Axis axis;
 
   @override
   State<TutorialView> createState() => _TutorialViewState();
@@ -140,7 +144,8 @@ class _TutorialViewState extends State<TutorialView> {
         triangleColor: widget.triangleColor,
         triangleSize: widget.triangleSize,
         message: message.message,
-        horizontalPadding: widget.horizontalPadding,
+        padding: widget.padding,
+        axis: widget.axis,
         child: child ?? const SizedBox.shrink(),
       ),
     );

@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:tutorial/src/triangles/right_triangle.dart';
+
+import 'triangles/down_triangle.dart';
+import 'triangles/left_triangle.dart';
+import 'triangles/upper_triangle.dart';
 
 class TooltipController extends ChangeNotifier {
   bool _isShow = false;
@@ -30,7 +35,8 @@ class TooltipWidget extends StatefulWidget {
     required this.messagePadding,
     required this.messageDecoration,
     required this.messageStyle,
-    required this.horizontalPadding,
+    required this.padding,
+    required this.axis,
   });
 
   /// Message
@@ -46,7 +52,7 @@ class TooltipWidget extends StatefulWidget {
   final Size triangleSize;
 
   /// Gap between target and tooltip
-  final double? targetPadding;
+  final double targetPadding;
 
   /// Show callback
   final VoidCallback? onShow;
@@ -67,7 +73,10 @@ class TooltipWidget extends StatefulWidget {
   final TextStyle messageStyle;
 
   /// Message Box padding
-  final double horizontalPadding;
+  final EdgeInsetsGeometry padding;
+
+  /// Axis
+  final Axis axis;
 
   @override
   State<TooltipWidget> createState() => _TooltipWidgetState();
@@ -126,23 +135,35 @@ class _TooltipWidgetState extends State<TooltipWidget> with SingleTickerProvider
       return;
     }
 
-    Alignment targetAnchor;
-    Alignment followerAnchor;
-
-    final builder = makeAlignment(
-      messagePadding: widget.messagePadding,
-      messageDecoration: widget.messageDecoration,
-      messageStyle: widget.messageStyle,
-      triangleColor: widget.triangleColor,
-      message: widget.message,
-    );
+    final builder = _builder();
 
     if (builder == null) {
       return;
     }
 
-    targetAnchor = builder.targetAnchor;
-    followerAnchor = builder.followerAnchor;
+    final Widget triangle = switch (builder.targetAnchor) {
+      Alignment.bottomCenter => const UpperTriangle(),
+      Alignment.topCenter => const DownTriangle(),
+      Alignment.centerLeft => const RightTriangle(),
+      Alignment.centerRight => const LeftTriangle(),
+      _ => const SizedBox.shrink(),
+    };
+
+    final Offset triangleOffset = switch (builder.targetAnchor) {
+      Alignment.bottomCenter => Offset(0, widget.targetPadding),
+      Alignment.topCenter => Offset(0, -(widget.targetPadding)),
+      Alignment.centerLeft => Offset(-(widget.targetPadding), 0),
+      Alignment.centerRight => Offset(widget.targetPadding, 0),
+      _ => Offset.zero,
+    };
+
+    final Offset messageBoxOffset = switch (builder.targetAnchor) {
+      Alignment.bottomCenter => Offset(builder.offset.dx, widget.triangleSize.height + (widget.targetPadding)),
+      Alignment.topCenter => Offset(builder.offset.dx, -widget.triangleSize.height - (widget.targetPadding)),
+      Alignment.centerLeft => Offset(-(widget.targetPadding) - widget.triangleSize.width, 0),
+      Alignment.centerRight => Offset((widget.targetPadding) + widget.triangleSize.width, 0),
+      _ => Offset.zero,
+    };
 
     _overlayEntry = OverlayEntry(
       builder: (context) {
@@ -151,27 +172,22 @@ class _TooltipWidgetState extends State<TooltipWidget> with SingleTickerProvider
             const SizedBox.expand(),
             CompositedTransformFollower(
               link: _layerLink,
-              targetAnchor: targetAnchor,
-              followerAnchor: followerAnchor,
-              offset: Offset(0, targetAnchor == Alignment.bottomCenter ? widget.targetPadding ?? 0 : -(widget.targetPadding ?? 0)),
+              targetAnchor: builder.targetAnchor,
+              followerAnchor: builder.followerAnchor,
+              offset: triangleOffset,
               child: FadeTransition(
                 opacity: _animation,
                 child: SizedBox.fromSize(
                   size: widget.triangleSize,
-                  child: targetAnchor == Alignment.bottomCenter ? const UpperTriangleWidget() : const DownTriangleWidget(),
+                  child: triangle,
                 ),
               ),
             ),
             CompositedTransformFollower(
               link: _layerLink,
-              targetAnchor: targetAnchor,
-              followerAnchor: followerAnchor,
-              offset: Offset(
-                builder.dx,
-                targetAnchor == Alignment.bottomCenter
-                    ? widget.triangleSize.height + (widget.targetPadding ?? 0)
-                    : -widget.triangleSize.height - (widget.targetPadding ?? 0),
-              ),
+              targetAnchor: builder.targetAnchor,
+              followerAnchor: builder.followerAnchor,
+              offset: messageBoxOffset,
               child: FadeTransition(
                 opacity: _animation,
                 child: builder.messageBox,
@@ -197,13 +213,7 @@ class _TooltipWidgetState extends State<TooltipWidget> with SingleTickerProvider
     }
   }
 
-  ({Alignment targetAnchor, Alignment followerAnchor, Widget messageBox, double dx})? makeAlignment({
-    required EdgeInsetsGeometry messagePadding,
-    required BoxDecoration messageDecoration,
-    required TextStyle messageStyle,
-    required Color triangleColor,
-    String? message = '',
-  }) {
+  ({Alignment targetAnchor, Alignment followerAnchor, Widget messageBox, Offset offset})? _builder() {
     final renderBox = key.currentContext?.findRenderObject() as RenderBox?;
 
     if (renderBox == null) {
@@ -211,49 +221,65 @@ class _TooltipWidgetState extends State<TooltipWidget> with SingleTickerProvider
       return null;
     }
 
-    final size = renderBox.size;
-    final position = renderBox.localToGlobal(Offset.zero);
-    final centerPosition = Offset(position.dx + size.width / 2, position.dy + size.height / 2);
-    final maxWidth = MediaQuery.of(context).size.width - widget.horizontalPadding * 2;
+    final targetSize = renderBox.size;
+    final targetPosition = renderBox.localToGlobal(Offset.zero);
+    final targetCenterPosition = Offset(targetPosition.dx + targetSize.width / 2, targetPosition.dy + targetSize.height / 2);
+    final bool isLeft = targetCenterPosition.dx <= MediaQuery.of(context).size.width / 2;
+    final bool isRight = targetCenterPosition.dx > MediaQuery.of(context).size.width / 2;
+    final bool isBottom = targetCenterPosition.dy <= MediaQuery.of(context).size.height / 2;
+    final bool isTop = targetCenterPosition.dy > MediaQuery.of(context).size.height / 2;
+
+    final deviceWidth = MediaQuery.of(context).size.width;
+    final remainWidth = switch (widget.axis) {
+      Axis.vertical => deviceWidth - widget.padding.horizontal,
+      Axis.horizontal when isRight => targetPosition.dx - (widget.padding.horizontal / 2) - widget.targetPadding - widget.triangleSize.width,
+      Axis.horizontal when isLeft =>
+        deviceWidth - (targetPosition.dx + targetSize.width + widget.padding.horizontal / 2) - widget.targetPadding - widget.triangleSize.width,
+      _ => deviceWidth,
+    };
 
     final Widget messageBox = Material(
       type: MaterialType.transparency,
       child: Container(
         key: messageBoxKey,
-        constraints: BoxConstraints(maxWidth: maxWidth),
-        padding: messagePadding,
-        decoration: messageDecoration,
-        child: Text(message ?? '', style: messageStyle, softWrap: true, textScaler: TextScaler.noScaling),
+        constraints: BoxConstraints(maxWidth: remainWidth),
+        padding: widget.messagePadding,
+        decoration: widget.messageDecoration,
+        child: Text(widget.message ?? '', style: widget.messageStyle, softWrap: true, textScaler: TextScaler.noScaling),
       ),
     );
 
-    Alignment targetAnchor;
-    Alignment followerAnchor;
+    Alignment targetAnchor = switch (widget.axis) {
+      Axis.horizontal when isRight => Alignment.centerLeft,
+      Axis.horizontal when isLeft => Alignment.centerRight,
+      Axis.vertical when isTop => Alignment.topCenter,
+      Axis.vertical when isBottom => Alignment.bottomCenter,
+      _ => Alignment.center,
+    };
 
-    if (centerPosition.dy > MediaQuery.of(context).size.height / 2) {
-      targetAnchor = Alignment.topCenter;
-      followerAnchor = Alignment.bottomCenter;
-    } else {
-      targetAnchor = Alignment.bottomCenter;
-      followerAnchor = Alignment.topCenter;
-    }
+    Alignment followerAnchor = switch (widget.axis) {
+      Axis.horizontal when isRight => Alignment.centerRight,
+      Axis.horizontal when isLeft => Alignment.centerLeft,
+      Axis.vertical when isTop => Alignment.bottomCenter,
+      Axis.vertical when isBottom => Alignment.topCenter,
+      _ => Alignment.center,
+    };
 
-    double preferredWidth = _textSize(message ?? '', messageStyle).width + messagePadding.horizontal;
-    if (preferredWidth > maxWidth) preferredWidth = maxWidth;
+    final Size preferredSize = _textSize(widget.message ?? '', widget.messageStyle, remainWidth);
 
-    final double overflowWidth = (preferredWidth - size.width) / 2;
+    final double overflowWidth = (preferredSize.width - targetSize.width) / 2;
     double dx;
 
     if (overflowWidth < 0) {
       dx = 0;
     } else {
-      final edgeFromLeft = position.dx;
-      final edgeFromRight = MediaQuery.of(context).size.width - (position.dx + size.width);
+      final edgeFromLeft = targetPosition.dx;
+      final edgeFromRight = MediaQuery.of(context).size.width - (targetPosition.dx + targetSize.width);
 
-      if (widget.horizontalPadding + edgeFromLeft - overflowWidth < 0) {
-        dx = widget.horizontalPadding + overflowWidth - edgeFromLeft;
-      } else if (widget.horizontalPadding + edgeFromRight - overflowWidth < 0) {
-        dx = edgeFromRight - (overflowWidth + widget.horizontalPadding);
+      if (widget.padding.horizontal / 2 + edgeFromLeft - overflowWidth < 0) {
+        dx = widget.padding.horizontal / 2 + overflowWidth - edgeFromLeft;
+      } else if (widget.padding.horizontal / 2 + edgeFromRight - overflowWidth < 0) {
+        dx = edgeFromRight - (overflowWidth + widget.padding.horizontal / 2);
       } else {
         dx = 0;
       }
@@ -263,108 +289,13 @@ class _TooltipWidgetState extends State<TooltipWidget> with SingleTickerProvider
       targetAnchor: targetAnchor,
       followerAnchor: followerAnchor,
       messageBox: messageBox,
-      dx: dx,
+      offset: Offset(dx, 0),
     );
   }
 
-  Size _textSize(String text, TextStyle style) {
+  Size _textSize(String text, TextStyle style, double maxWidth) {
     final TextPainter textPainter = TextPainter(text: TextSpan(text: text, style: style), textDirection: TextDirection.ltr)
-      ..layout(minWidth: 0, maxWidth: double.infinity);
+      ..layout(minWidth: 0, maxWidth: maxWidth);
     return textPainter.size;
-  }
-}
-
-class UpperTriangleWidget extends StatelessWidget {
-  const UpperTriangleWidget({
-    super.key,
-    this.backgroundColor = Colors.white,
-  });
-
-  final Color backgroundColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: UpperTrianglePainter(
-        backgroundColor: backgroundColor,
-      ),
-    );
-  }
-}
-
-class UpperTrianglePainter extends CustomPainter {
-  const UpperTrianglePainter({
-    required this.backgroundColor,
-  });
-
-  final Color backgroundColor;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint()
-      ..color = backgroundColor
-      ..strokeWidth = 1.0
-      ..style = PaintingStyle.fill
-      ..strokeCap = StrokeCap.round;
-
-    final path = Path();
-    path.moveTo(size.width, size.height); // 오른쪽 아래
-    path.lineTo(size.width / 2, 0); // 꼭대기
-    path.lineTo(0, size.height); // 왼쪽 아래
-    path.close();
-
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) {
-    return false;
-  }
-}
-
-class DownTriangleWidget extends StatelessWidget {
-  const DownTriangleWidget({
-    super.key,
-    this.backgroundColor = Colors.white,
-  });
-
-  final Color backgroundColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: DownTrianglePainter(
-        backgroundColor: backgroundColor,
-      ),
-    );
-  }
-}
-
-class DownTrianglePainter extends CustomPainter {
-  const DownTrianglePainter({
-    required this.backgroundColor,
-  });
-
-  final Color backgroundColor;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint()
-      ..color = backgroundColor
-      ..strokeWidth = 1.0
-      ..style = PaintingStyle.fill
-      ..strokeCap = StrokeCap.round;
-
-    final path = Path();
-    path.lineTo(size.width / 2, size.height); // 꼭대기
-    path.lineTo(size.width, 0); // 오른쪽 위
-    path.close();
-
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) {
-    return false;
   }
 }
