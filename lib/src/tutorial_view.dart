@@ -4,44 +4,26 @@ import 'package:tutorial/src/tooltip_widget.dart';
 import 'messages/tutorial_message.dart';
 import 'messages/message.dart';
 import 'messages/tutorial_item_message.dart';
+import 'tutorial.dart';
 import 'tutorial_item.dart';
 
 class TutorialView extends StatefulWidget {
   const TutorialView({
     super.key,
     required this.messages,
-    required this.messagePadding,
-    required this.messageDecoration,
-    required this.messageStyle,
-    required this.triangleColor,
-    required this.triangleSize,
-    required this.padding,
-    required this.axis,
+    required this.messageConfig,
+    required this.itemMessageConfig,
+    required this.tooltipConfig,
   });
 
   /// Messages
   final List<List<Message>> messages;
 
-  /// Message Box padding
-  final EdgeInsetsGeometry messagePadding;
+  final TutorialMessageConfig messageConfig;
 
-  /// Message Box decoration
-  final BoxDecoration messageDecoration;
+  final TutorialItemMessageConfig itemMessageConfig;
 
-  /// Message Box text style
-  final TextStyle messageStyle;
-
-  /// Triangle color
-  final Color triangleColor;
-
-  /// Triangle size
-  final Size triangleSize;
-
-  /// Message Box Padding
-  final EdgeInsetsGeometry padding;
-
-  /// Axis
-  final Axis axis;
+  final TooltipConfig tooltipConfig;
 
   @override
   State<TutorialView> createState() => _TutorialViewState();
@@ -100,6 +82,10 @@ class _TutorialViewState extends State<TutorialView> {
 
     if (message is TutorialMessage) {
       child = message.child;
+      top = message.tutorialMessageConfig?.top ?? widget.messageConfig.top;
+      bottom = message.tutorialMessageConfig?.bottom ?? widget.messageConfig.bottom;
+      left = message.tutorialMessageConfig?.left ?? widget.messageConfig.left;
+      right = message.tutorialMessageConfig?.right ?? widget.messageConfig.right;
     } else if (message is TutorialItemMessage) {
       if (message.targetKey.currentContext == null) {
         Exception('Target key is null');
@@ -119,9 +105,9 @@ class _TutorialViewState extends State<TutorialView> {
 
       final TutorialItem target = message.targetKey.currentWidget! as TutorialItem;
 
-      if (message.foregroundColor != null) {
+      if ((message.tutorialItemMessageConfig?.foregroundColor ?? widget.itemMessageConfig.foregroundColor) != null) {
         child = ColorFiltered(
-          colorFilter: ColorFilter.mode(message.foregroundColor!, BlendMode.srcIn),
+          colorFilter: ColorFilter.mode(message.tutorialItemMessageConfig?.foregroundColor ?? widget.itemMessageConfig.foregroundColor!, BlendMode.srcIn),
           child: target.child,
         );
       } else {
@@ -138,14 +124,14 @@ class _TutorialViewState extends State<TutorialView> {
         key: UniqueKey(),
         controller: controller,
         targetPadding: 4,
-        messageDecoration: widget.messageDecoration,
-        messagePadding: widget.messagePadding,
-        messageStyle: widget.messageStyle,
-        triangleColor: widget.triangleColor,
-        triangleSize: widget.triangleSize,
+        messageDecoration: message.tooltipConfig?.messageDecoration ?? widget.tooltipConfig.messageDecoration,
+        messagePadding: message.tooltipConfig?.messagePadding ?? widget.tooltipConfig.messagePadding,
+        messageStyle: message.tooltipConfig?.messageStyle ?? widget.tooltipConfig.messageStyle,
+        triangleColor: message.tooltipConfig?.triangleColor ?? widget.tooltipConfig.triangleColor,
+        triangleSize: message.tooltipConfig?.triangleSize ?? widget.tooltipConfig.triangleSize,
+        padding: message.tooltipConfig?.padding ?? widget.tooltipConfig.padding,
+        axis: message.tooltipConfig?.axis ?? widget.tooltipConfig.axis,
         message: message.message,
-        padding: widget.padding,
-        axis: widget.axis,
         child: child ?? const SizedBox.shrink(),
       ),
     );

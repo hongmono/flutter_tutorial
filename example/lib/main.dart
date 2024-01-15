@@ -46,7 +46,7 @@ class _HomePageState extends State<HomePage> {
       ),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             TutorialItem(
               key: firstKey,
@@ -79,30 +79,23 @@ class _HomePageState extends State<HomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Tutorial.of(context)
-            ..messageDecoration = BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8))
-            ..messagePadding = const EdgeInsets.symmetric(horizontal: 16, vertical: 8)
-            ..triangleSize = const Size(10, 10)
-            ..padding = const EdgeInsets.all(24)
-            ..axis = Axis.vertical
-            ..start(
+          Tutorial.of(context).start(
+            [
+              [const TutorialMessage(child: CircleAvatar(child: FlutterLogo()), message: 'hi')],
+              [TutorialItemMessage(targetKey: firstKey, message: 'This is a first item')],
+              [TutorialItemMessage(targetKey: secondKey, message: 'This is a second item')],
               [
-                [TutorialItemMessage(targetKey: firstKey, message: 'This is a first item')],
-                [TutorialItemMessage(targetKey: secondKey, foregroundColor: Colors.white, message: 'This is a second item')],
-                [
-                  TutorialItemMessage(
-                    targetKey: thirdKey,
-                    foregroundColor: Colors.white,
-                    message:
-                        'this is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth item',
-                  ),
-                  TutorialItemMessage(
-                    targetKey: fourthKey,
-                    foregroundColor: Colors.red,
-                  ),
-                ],
+                TutorialItemMessage(
+                  targetKey: thirdKey,
+                  message:
+                      'this is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth item',
+                ),
+                TutorialItemMessage(
+                  targetKey: fourthKey,
+                ),
               ],
-            );
+            ],
+          );
         },
         child: const Icon(Icons.play_arrow),
       ),

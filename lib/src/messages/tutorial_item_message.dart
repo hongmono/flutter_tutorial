@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:tutorial/src/tutorial.dart';
 
 import 'message.dart';
 
 class TutorialItemMessage extends Message {
   const TutorialItemMessage({
     required this.targetKey,
-    this.foregroundColor,
+    this.tutorialItemMessageConfig,
     super.message,
   });
 
   final GlobalKey targetKey;
-  final Color? foregroundColor;
+  final TutorialItemMessageConfig? tutorialItemMessageConfig;
 }

@@ -4,42 +4,15 @@ import 'tutorial_view.dart';
 import 'messages/message.dart';
 
 class Tutorial {
+  Tutorial.of(this.context);
+
   final BuildContext context;
 
-  /// Message Box padding
-  ///
-  /// Default: `const EdgeInsets.symmetric(horizontal: 16, vertical: 8)`
-  EdgeInsetsGeometry? messagePadding;
+  TutorialMessageConfig? messageConfig;
 
-  /// Message Box decoration
-  ///
-  /// Default: `BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8))`
-  BoxDecoration? messageDecoration;
+  TutorialItemMessageConfig? itemMessageConfig;
 
-  /// Message Box text style
-  TextStyle? messageStyle;
-
-  /// Triangle color
-  ///
-  /// Default: `Colors.white`
-  Color? triangleColor;
-
-  /// Triangle size
-  ///
-  /// Default: `const Size(10, 10)`
-  Size? triangleSize;
-
-  /// Message Box Padding
-  ///
-  /// Default: `const EdgeInsets.all(24)`
-  EdgeInsetsGeometry? padding;
-
-  /// Axis
-  ///
-  /// Default: `Axis.vertical`
-  Axis? axis;
-
-  Tutorial.of(this.context);
+  TooltipConfig? tooltipConfig;
 
   Future<void> start(List<List<Message>> messages) async {
     await Navigator.push(
@@ -48,18 +21,81 @@ class Tutorial {
         builder: (context) {
           return TutorialView(
             messages: messages,
-            messagePadding: messagePadding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            messageDecoration: messageDecoration ?? BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8)),
-            messageStyle: messageStyle ?? const TextStyle(color: Colors.black, fontSize: 16),
-            triangleColor: triangleColor ?? Colors.white,
-            triangleSize: triangleSize ?? const Size(10, 10),
-            padding: padding ?? const EdgeInsets.all(24),
-            axis: axis ?? Axis.vertical,
+            messageConfig: messageConfig ?? TutorialMessageConfig(),
+            itemMessageConfig: itemMessageConfig ?? TutorialItemMessageConfig(),
+            tooltipConfig: tooltipConfig ?? TooltipConfig(),
           );
         },
       ),
     );
   }
+}
+
+class TutorialMessageConfig {
+  TutorialMessageConfig({
+    this.top,
+    this.bottom = 24,
+    this.left = 24,
+    this.right,
+  });
+
+  final double? top;
+  final double? bottom;
+  final double? left;
+  final double? right;
+}
+
+class TutorialItemMessageConfig {
+  TutorialItemMessageConfig({
+    this.foregroundColor,
+  });
+
+  final Color? foregroundColor;
+}
+
+class TooltipConfig {
+  TooltipConfig({
+    this.messagePadding = const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    this.messageDecoration = const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.all(Radius.circular(8))),
+    this.messageStyle = const TextStyle(color: Colors.black, fontSize: 16),
+    this.triangleColor = Colors.white,
+    this.triangleSize = const Size(10, 10),
+    this.padding = const EdgeInsets.all(24),
+    this.axis = Axis.vertical,
+  });
+
+  /// Message Box padding
+  ///
+  /// Default: `const EdgeInsets.symmetric(horizontal: 16, vertical: 8)`
+  EdgeInsetsGeometry messagePadding;
+
+  /// Message Box decoration
+  ///
+  /// Default: `BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8))`
+  BoxDecoration messageDecoration;
+
+  /// Message Box text style
+  TextStyle messageStyle;
+
+  /// Triangle color
+  ///
+  /// Default: `Colors.white`
+  Color triangleColor;
+
+  /// Triangle size
+  ///
+  /// Default: `const Size(10, 10)`
+  Size triangleSize;
+
+  /// Message Box Padding
+  ///
+  /// Default: `const EdgeInsets.all(24)`
+  EdgeInsetsGeometry padding;
+
+  /// Axis
+  ///
+  /// Default: `Axis.vertical`
+  Axis axis;
 }
 
 class HeroDialogRoute<T> extends PageRoute<T> {
