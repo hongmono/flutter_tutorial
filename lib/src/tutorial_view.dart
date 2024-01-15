@@ -132,7 +132,7 @@ class _TutorialViewState extends State<TutorialView> {
         padding: message.tooltipConfig?.padding ?? widget.tooltipConfig.padding,
         axis: message.tooltipConfig?.axis ?? widget.tooltipConfig.axis,
         message: message.message,
-        child: child ?? const SizedBox.shrink(),
+        child: IgnorePointer(ignoring: true, child: child ?? const SizedBox.shrink()),
       ),
     );
   }
