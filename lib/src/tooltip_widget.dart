@@ -142,10 +142,10 @@ class _TooltipWidgetState extends State<TooltipWidget> with SingleTickerProvider
     }
 
     final Widget triangle = switch (builder.targetAnchor) {
-      Alignment.bottomCenter => const UpperTriangle(),
-      Alignment.topCenter => const DownTriangle(),
-      Alignment.centerLeft => const RightTriangle(),
-      Alignment.centerRight => const LeftTriangle(),
+      Alignment.bottomCenter => UpperTriangle(backgroundColor: widget.triangleColor),
+      Alignment.topCenter => DownTriangle(backgroundColor: widget.triangleColor),
+      Alignment.centerLeft => RightTriangle(backgroundColor: widget.triangleColor),
+      Alignment.centerRight => LeftTriangle(backgroundColor: widget.triangleColor),
       _ => const SizedBox.shrink(),
     };
 
@@ -233,8 +233,7 @@ class _TooltipWidgetState extends State<TooltipWidget> with SingleTickerProvider
     final remainWidth = switch (widget.axis) {
       Axis.vertical => deviceWidth - widget.padding.horizontal,
       Axis.horizontal when isRight => targetPosition.dx - (widget.padding.horizontal / 2) - widget.targetPadding - widget.triangleSize.width,
-      Axis.horizontal when isLeft =>
-        deviceWidth - (targetPosition.dx + targetSize.width + widget.padding.horizontal / 2) - widget.targetPadding - widget.triangleSize.width,
+      Axis.horizontal when isLeft => deviceWidth - (targetPosition.dx + targetSize.width + widget.padding.horizontal / 2) - widget.targetPadding - widget.triangleSize.width,
       _ => deviceWidth,
     };
 
@@ -294,8 +293,7 @@ class _TooltipWidgetState extends State<TooltipWidget> with SingleTickerProvider
   }
 
   Size _textSize(String text, TextStyle style, double maxWidth) {
-    final TextPainter textPainter = TextPainter(text: TextSpan(text: text, style: style), textDirection: TextDirection.ltr)
-      ..layout(minWidth: 0, maxWidth: maxWidth);
+    final TextPainter textPainter = TextPainter(text: TextSpan(text: text, style: style), textDirection: TextDirection.ltr)..layout(minWidth: 0, maxWidth: maxWidth);
     return textPainter.size;
   }
 }
