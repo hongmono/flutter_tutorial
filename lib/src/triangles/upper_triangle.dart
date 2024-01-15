@@ -29,7 +29,8 @@ class UpperTrianglePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint()
       ..color = backgroundColor
-      ..strokeWidth = 1.0
+      ..strokeWidth = 5.0
+      ..strokeJoin = StrokeJoin.round
       ..style = PaintingStyle.fill
       ..strokeCap = StrokeCap.round;
 
