@@ -7,6 +7,6 @@ class TutorialItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return child;
+    return IgnorePointer(ignoring: true, child: child);
   }
 }

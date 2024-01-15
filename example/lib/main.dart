@@ -83,7 +83,7 @@ class _HomePageState extends State<HomePage> {
             ..tooltipConfig = TooltipConfig(axis: Axis.horizontal)
             ..start(
               [
-                [const TutorialMessage(child: CircleAvatar(child: FlutterLogo()), message: 'hi')],
+                [const TutorialMessage(message: 'hi')],
                 [TutorialItemMessage(targetKey: firstKey, message: 'This is a first item', tooltipConfig: TooltipConfig(axis: Axis.vertical))],
                 [TutorialItemMessage(targetKey: secondKey, message: 'This is a second item')],
                 [
