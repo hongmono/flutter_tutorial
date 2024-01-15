@@ -21,7 +21,7 @@ class Tutorial {
         builder: (context) {
           return TutorialView(
             messages: messages,
-            messageConfig: messageConfig ?? TutorialMessageConfig(),
+            messageConfig: messageConfig ?? TutorialMessageConfig(child: const FlutterLogo()),
             itemMessageConfig: itemMessageConfig ?? TutorialItemMessageConfig(),
             tooltipConfig: tooltipConfig ?? TooltipConfig(),
           );
@@ -33,12 +33,14 @@ class Tutorial {
 
 class TutorialMessageConfig {
   TutorialMessageConfig({
+    required this.child,
     this.top,
     this.bottom = 24,
     this.left = 24,
     this.right,
   });
 
+  final Widget child;
   final double? top;
   final double? bottom;
   final double? left;

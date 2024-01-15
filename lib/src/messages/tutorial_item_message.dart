@@ -7,6 +7,7 @@ class TutorialItemMessage extends Message {
   const TutorialItemMessage({
     required this.targetKey,
     this.tutorialItemMessageConfig,
+    super.tooltipConfig,
     super.message,
   });
 

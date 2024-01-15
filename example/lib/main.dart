@@ -79,23 +79,25 @@ class _HomePageState extends State<HomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Tutorial.of(context).start(
-            [
-              [const TutorialMessage(child: CircleAvatar(child: FlutterLogo()), message: 'hi')],
-              [TutorialItemMessage(targetKey: firstKey, message: 'This is a first item')],
-              [TutorialItemMessage(targetKey: secondKey, message: 'This is a second item')],
+          Tutorial.of(context)
+            ..tooltipConfig = TooltipConfig(axis: Axis.horizontal)
+            ..start(
               [
-                TutorialItemMessage(
-                  targetKey: thirdKey,
-                  message:
-                      'this is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth item',
-                ),
-                TutorialItemMessage(
-                  targetKey: fourthKey,
-                ),
+                [const TutorialMessage(child: CircleAvatar(child: FlutterLogo()), message: 'hi')],
+                [TutorialItemMessage(targetKey: firstKey, message: 'This is a first item', tooltipConfig: TooltipConfig(axis: Axis.vertical))],
+                [TutorialItemMessage(targetKey: secondKey, message: 'This is a second item')],
+                [
+                  TutorialItemMessage(
+                    targetKey: thirdKey,
+                    message:
+                        'this is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth item',
+                  ),
+                  TutorialItemMessage(
+                    targetKey: fourthKey,
+                  ),
+                ],
               ],
-            ],
-          );
+            );
         },
         child: const Icon(Icons.play_arrow),
       ),
