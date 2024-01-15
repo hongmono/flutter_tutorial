@@ -81,7 +81,7 @@ class _TutorialViewState extends State<TutorialView> {
     double? right;
 
     if (message is TutorialMessage) {
-      child = message.tutorialMessageConfig?.child ?? widget.messageConfig.child;
+      child = message.tutorialMessageConfig?.child ?? widget.messageConfig.child ?? const CircleAvatar(child: FlutterLogo());
       top = message.tutorialMessageConfig?.top ?? widget.messageConfig.top;
       bottom = message.tutorialMessageConfig?.bottom ?? widget.messageConfig.bottom;
       left = message.tutorialMessageConfig?.left ?? widget.messageConfig.left;

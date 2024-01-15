@@ -33,14 +33,14 @@ class Tutorial {
 
 class TutorialMessageConfig {
   TutorialMessageConfig({
-    required this.child,
+    this.child,
     this.top,
     this.bottom = 24,
     this.left = 24,
     this.right,
   });
 
-  final Widget child;
+  final Widget? child;
   final double? top;
   final double? bottom;
   final double? left;
