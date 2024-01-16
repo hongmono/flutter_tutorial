@@ -48,6 +48,7 @@ class _TutorialViewState extends State<TutorialView> {
   @override
   Widget build(BuildContext context) {
     if (messages.isEmpty) {
+      controller.dispose();
       Navigator.pop(context);
       return const SizedBox.shrink();
     }
@@ -62,7 +63,7 @@ class _TutorialViewState extends State<TutorialView> {
       behavior: HitTestBehavior.opaque,
       onTap: () {
         controller.dismiss();
-        setState(() {});
+        if (mounted) setState(() {});
       },
       child: PopScope(
         canPop: false,
