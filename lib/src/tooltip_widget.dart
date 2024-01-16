@@ -279,8 +279,6 @@ class _TooltipWidgetState extends State<TooltipWidget> with SingleTickerProvider
     final edgeFromRight = MediaQuery.of(context).size.width - (targetPosition.dx + targetSize.width + overflowWidth);
     final edgeFromSide = min(edgeFromLeft, edgeFromRight);
 
-    print(edgeFromSide);
-
     double dx = 0;
 
     if (edgeFromSide < widget.padding.horizontal / 2) {

@@ -64,10 +64,13 @@ class _TutorialViewState extends State<TutorialView> {
         controller.dismiss();
         setState(() {});
       },
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: Stack(
-          children: [...message.map(buildTutorialItem)],
+      child: PopScope(
+        canPop: false,
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Stack(
+            children: [...message.map(buildTutorialItem)],
+          ),
         ),
       ),
     );
