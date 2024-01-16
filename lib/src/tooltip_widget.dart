@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:tutorial/src/triangles/right_triangle.dart';
 
@@ -284,6 +285,10 @@ class _TooltipWidgetState extends State<TooltipWidget> with SingleTickerProvider
       }
     }
 
+    if (kDebugMode) {
+      print(
+          'targetCenterPosition: $targetCenterPosition, targetPosition: $targetPosition, targetSize: $targetSize, deviceWidth: $deviceWidth, remainWidth: $remainWidth, preferredSize: $preferredSize, overflowWidth: $overflowWidth, dx: $dx');
+    }
     return (
       targetAnchor: targetAnchor,
       followerAnchor: followerAnchor,
