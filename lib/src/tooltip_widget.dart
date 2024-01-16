@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:tutorial/src/triangles/right_triangle.dart';
@@ -265,30 +267,30 @@ class _TooltipWidgetState extends State<TooltipWidget> with SingleTickerProvider
       _ => Alignment.center,
     };
 
-    final Size preferredSize = _textSize(widget.message ?? '', widget.messageStyle, remainWidth);
+    final Size preferredSize = _textSize(widget.message ?? '', widget.messageStyle, remainWidth - widget.messagePadding.horizontal) +
+        Offset(
+          widget.messagePadding.horizontal,
+          widget.messagePadding.vertical,
+        );
 
     final double overflowWidth = (preferredSize.width - targetSize.width) / 2;
-    double dx;
 
-    if (overflowWidth < 0) {
-      dx = 0;
-    } else {
-      final edgeFromLeft = targetPosition.dx;
-      final edgeFromRight = MediaQuery.of(context).size.width - (targetPosition.dx + targetSize.width);
+    final edgeFromLeft = targetPosition.dx - overflowWidth;
+    final edgeFromRight = MediaQuery.of(context).size.width - (targetPosition.dx + targetSize.width + overflowWidth);
+    final edgeFromSide = min(edgeFromLeft, edgeFromRight);
 
-      if (widget.padding.horizontal / 2 + edgeFromLeft - overflowWidth < 0) {
-        dx = widget.padding.horizontal / 2 + overflowWidth - edgeFromLeft;
-      } else if (widget.padding.horizontal / 2 + edgeFromRight - overflowWidth < 0) {
-        dx = edgeFromRight - (overflowWidth + widget.padding.horizontal / 2);
+    print(edgeFromSide);
+
+    double dx = 0;
+
+    if (edgeFromSide < widget.padding.horizontal / 2) {
+      if (isLeft) {
+        dx = (widget.padding.horizontal / 2) - edgeFromSide;
       } else {
-        dx = 0;
+        dx = -(widget.padding.horizontal / 2) + edgeFromSide;
       }
     }
 
-    if (kDebugMode) {
-      print(
-          'targetCenterPosition: $targetCenterPosition, targetPosition: $targetPosition, targetSize: $targetSize, deviceWidth: $deviceWidth, remainWidth: $remainWidth, preferredSize: $preferredSize, overflowWidth: $overflowWidth, dx: $dx');
-    }
     return (
       targetAnchor: targetAnchor,
       followerAnchor: followerAnchor,

@@ -54,7 +54,7 @@ class _HomePageState extends State<HomePage> {
             ),
             const SizedBox(height: 20),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 0.0),
+              padding: const EdgeInsets.symmetric(horizontal: 64.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -84,16 +84,16 @@ class _HomePageState extends State<HomePage> {
             ..start(
               [
                 [const TutorialMessage(message: 'hi')],
-                [TutorialItemMessage(targetKey: firstKey, message: 'This is a first item', tooltipConfig: TooltipConfig(axis: Axis.vertical))],
+                [TutorialItemMessage(targetKey: firstKey, message: 'This is a first item')],
                 [TutorialItemMessage(targetKey: secondKey, message: 'This is a second item')],
                 [
                   TutorialItemMessage(
-                    targetKey: thirdKey,
+                    targetKey: fourthKey,
                     message:
                         'this is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth item',
                   ),
                   TutorialItemMessage(
-                    targetKey: fourthKey,
+                    targetKey: thirdKey,
                   ),
                 ],
               ],

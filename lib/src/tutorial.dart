@@ -15,17 +15,14 @@ class Tutorial {
   TooltipConfig? tooltipConfig;
 
   Future<void> start(List<List<Message>> messages) async {
-    await Navigator.push(
-      context,
-      HeroDialogRoute(
-        builder: (context) {
-          return TutorialView(
-            messages: messages,
-            messageConfig: messageConfig ?? TutorialMessageConfig(child: const FlutterLogo()),
-            itemMessageConfig: itemMessageConfig ?? TutorialItemMessageConfig(),
-            tooltipConfig: tooltipConfig ?? TooltipConfig(),
-          );
-        },
+    await showDialog(
+      context: context,
+      useSafeArea: false,
+      builder: (context) => TutorialView(
+        messages: messages,
+        messageConfig: messageConfig ?? TutorialMessageConfig(child: const FlutterLogo()),
+        itemMessageConfig: itemMessageConfig ?? TutorialItemMessageConfig(),
+        tooltipConfig: tooltipConfig ?? TooltipConfig(),
       ),
     );
   }
