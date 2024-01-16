@@ -62,7 +62,7 @@ class _TutorialViewState extends State<TutorialView> {
       behavior: HitTestBehavior.opaque,
       onTap: () {
         controller.dismiss();
-        setState(() {});
+        if (mounted) setState(() {});
       },
       child: PopScope(
         canPop: false,
