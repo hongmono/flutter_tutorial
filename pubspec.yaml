@@ -1,6 +1,6 @@
 name: tutorial
 description: "컴포넌트의 기능을 설명해주는 패키지"
-version: 0.0.1
+version: 1.0.0
 homepage:
 
 environment:
