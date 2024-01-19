@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:tutorial/src/triangles/right_triangle.dart';
 
@@ -163,8 +162,8 @@ class _TooltipWidgetState extends State<TooltipWidget> with SingleTickerProvider
     final Offset messageBoxOffset = switch (builder.targetAnchor) {
       Alignment.bottomCenter => Offset(builder.offset.dx, widget.triangleSize.height + (widget.targetPadding)),
       Alignment.topCenter => Offset(builder.offset.dx, -widget.triangleSize.height - (widget.targetPadding)),
-      Alignment.centerLeft => Offset(-(widget.targetPadding) - widget.triangleSize.width, 0),
-      Alignment.centerRight => Offset((widget.targetPadding) + widget.triangleSize.width, 0),
+      Alignment.centerLeft => Offset(-(widget.targetPadding) - widget.triangleSize.width, builder.offset.dy),
+      Alignment.centerRight => Offset((widget.targetPadding) + widget.triangleSize.width, builder.offset.dy),
       _ => Offset.zero,
     };
 
@@ -229,8 +228,8 @@ class _TooltipWidgetState extends State<TooltipWidget> with SingleTickerProvider
     final targetCenterPosition = Offset(targetPosition.dx + targetSize.width / 2, targetPosition.dy + targetSize.height / 2);
     final bool isLeft = targetCenterPosition.dx <= MediaQuery.of(context).size.width / 2;
     final bool isRight = targetCenterPosition.dx > MediaQuery.of(context).size.width / 2;
-    final bool isBottom = targetCenterPosition.dy <= MediaQuery.of(context).size.height / 2;
-    final bool isTop = targetCenterPosition.dy > MediaQuery.of(context).size.height / 2;
+    final bool isBottom = targetCenterPosition.dy > MediaQuery.of(context).size.height / 2;
+    final bool isTop = targetCenterPosition.dy <= MediaQuery.of(context).size.height / 2;
 
     final deviceWidth = MediaQuery.of(context).size.width;
     final remainWidth = switch (widget.axis) {
@@ -267,7 +266,7 @@ class _TooltipWidgetState extends State<TooltipWidget> with SingleTickerProvider
       _ => Alignment.center,
     };
 
-    final Size preferredSize = _textSize(widget.message ?? '', widget.messageStyle, remainWidth - widget.messagePadding.horizontal) +
+    final Size preferredSize = _textSize(widget.message ?? '', widget.messageStyle, remainWidth - widget.padding.horizontal) +
         Offset(
           widget.messagePadding.horizontal,
           widget.messagePadding.vertical,
@@ -277,15 +276,31 @@ class _TooltipWidgetState extends State<TooltipWidget> with SingleTickerProvider
 
     final edgeFromLeft = targetPosition.dx - overflowWidth;
     final edgeFromRight = MediaQuery.of(context).size.width - (targetPosition.dx + targetSize.width + overflowWidth);
-    final edgeFromSide = min(edgeFromLeft, edgeFromRight);
+    final edgeFromHorizontal = min(edgeFromLeft, edgeFromRight);
 
     double dx = 0;
 
-    if (edgeFromSide < widget.padding.horizontal / 2) {
+    if (edgeFromHorizontal < widget.padding.horizontal / 2) {
       if (isLeft) {
-        dx = (widget.padding.horizontal / 2) - edgeFromSide;
+        dx = (widget.padding.horizontal / 2) - edgeFromHorizontal;
       } else {
-        dx = -(widget.padding.horizontal / 2) + edgeFromSide;
+        dx = -(widget.padding.horizontal / 2) + edgeFromHorizontal;
+      }
+    }
+
+    final double overflowHeight = (preferredSize.height - targetSize.height) / 2;
+
+    final edgeFromTop = targetPosition.dy - overflowHeight;
+    final edgeFromBottom = MediaQuery.of(context).size.height - (targetPosition.dy + targetSize.height + overflowHeight);
+    final edgeFromVertical = min(edgeFromTop, edgeFromBottom);
+
+    double dy = 0;
+
+    if (edgeFromVertical < widget.padding.vertical / 2) {
+      if (isTop) {
+        dy = MediaQuery.of(context).padding.top + (widget.padding.vertical / 2) - edgeFromVertical;
+      } else {
+        dy = MediaQuery.of(context).padding.bottom - (widget.padding.vertical / 2) + edgeFromVertical;
       }
     }
 
@@ -293,12 +308,19 @@ class _TooltipWidgetState extends State<TooltipWidget> with SingleTickerProvider
       targetAnchor: targetAnchor,
       followerAnchor: followerAnchor,
       messageBox: messageBox,
-      offset: Offset(dx, 0),
+      offset: Offset(dx, dy),
     );
   }
 
   Size _textSize(String text, TextStyle style, double maxWidth) {
-    final TextPainter textPainter = TextPainter(text: TextSpan(text: text, style: style), textDirection: TextDirection.ltr)..layout(minWidth: 0, maxWidth: maxWidth);
+    final TextPainter textPainter = TextPainter(
+      text: TextSpan(text: text, style: style),
+      textDirection: TextDirection.ltr,
+    )..layout(
+        minWidth: 0,
+        maxWidth: maxWidth,
+      );
+
     return textPainter.size;
   }
 }
