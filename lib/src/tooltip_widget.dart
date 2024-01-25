@@ -1,36 +1,11 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:tutorial/src/triangles/right_triangle.dart';
 
-import 'triangles/right_triangle.dart';
 import 'triangles/down_triangle.dart';
 import 'triangles/left_triangle.dart';
 import 'triangles/upper_triangle.dart';
-
-enum FlutterTooltipTriggerMode {
-  /// Show tooltip when tap
-  tap,
-
-  /// Show tooltip when long press
-  longPress,
-
-  /// Show tooltip when double tap
-  doubleTap,
-
-  /// Show tooltip only controller
-  manual,
-}
-
-enum FlutterTooltipDismissMode {
-  /// Dismiss when tap outside of tooltip
-  tapAnyWhere,
-
-  /// Dismiss when tap inside of tooltip
-  tapInside,
-
-  /// Dismiss only controller
-  manual,
-}
 
 class TooltipController extends ChangeNotifier {
   bool _isShow = false;
@@ -44,31 +19,26 @@ class TooltipController extends ChangeNotifier {
 
   void dismiss() {
     _isShow = false;
-
     notifyListeners();
   }
-
-  void toggle() => _isShow ? dismiss() : show();
 }
 
-class FlutterTooltip extends StatefulWidget {
-  const FlutterTooltip({
+class TooltipWidget extends StatefulWidget {
+  const TooltipWidget({
     super.key,
     required this.message,
     required this.child,
-    this.triangleColor = Colors.black,
-    this.triangleSize = const Size(10, 10),
-    this.targetPadding = 4,
+    required this.triangleColor,
+    required this.triangleSize,
+    required this.targetPadding,
     this.onShow,
     this.onDismiss,
     this.controller,
-    this.messagePadding = const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-    this.messageDecoration = const BoxDecoration(color: Colors.black, borderRadius: BorderRadius.all(Radius.circular(8))),
-    this.messageStyle = const TextStyle(color: Colors.white, fontSize: 14),
-    this.padding = const EdgeInsets.all(16),
-    this.axis = Axis.vertical,
-    this.triggerMode,
-    this.dismissMode,
+    required this.messagePadding,
+    required this.messageDecoration,
+    required this.messageStyle,
+    required this.padding,
+    required this.axis,
   });
 
   /// Message
@@ -102,7 +72,7 @@ class FlutterTooltip extends StatefulWidget {
   final BoxDecoration messageDecoration;
 
   /// Message Box text style
-  final TextStyle? messageStyle;
+  final TextStyle messageStyle;
 
   /// Message Box padding
   final EdgeInsetsGeometry padding;
@@ -110,22 +80,13 @@ class FlutterTooltip extends StatefulWidget {
   /// Axis
   final Axis axis;
 
-  /// Trigger mode
-  final FlutterTooltipTriggerMode? triggerMode;
-
-  /// dismiss mode
-  final FlutterTooltipDismissMode? dismissMode;
-
   @override
-  State<FlutterTooltip> createState() => _FlutterTooltipState();
+  State<TooltipWidget> createState() => _TooltipWidgetState();
 }
 
-class _FlutterTooltipState extends State<FlutterTooltip> with SingleTickerProviderStateMixin {
+class _TooltipWidgetState extends State<TooltipWidget> with SingleTickerProviderStateMixin {
   late final AnimationController _animationController;
   late final Animation<double> _animation;
-  late final TooltipController _controller;
-  FlutterTooltipTriggerMode? _triggerMode;
-  FlutterTooltipDismissMode? _dismissMode;
 
   final key = GlobalKey();
   final messageBoxKey = GlobalKey();
@@ -137,29 +98,14 @@ class _FlutterTooltipState extends State<FlutterTooltip> with SingleTickerProvid
     _animationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
     _animation = CurvedAnimation(parent: _animationController, curve: Curves.easeInOut);
 
-    _controller = widget.controller ?? TooltipController();
-    _controller.addListener(listener);
-
-    initProperties();
+    widget.controller?.addListener(listener);
 
     super.initState();
   }
 
   @override
-  void didUpdateWidget(covariant FlutterTooltip oldWidget) {
-    initProperties();
-
-    super.didUpdateWidget(oldWidget);
-  }
-
-  @override
   void dispose() {
-    dismiss();
-    _controller.removeListener(listener);
-    if (widget.controller == null) {
-      _controller.dispose();
-    }
-
+    widget.controller?.removeListener(listener);
     _overlayEntry?.remove();
     _animationController.dispose();
 
@@ -167,44 +113,18 @@ class _FlutterTooltipState extends State<FlutterTooltip> with SingleTickerProvid
   }
 
   void listener() {
-    if (_controller.isShow == true) {
+    if (widget.controller?.isShow == true) {
       show();
     } else {
       dismiss();
     }
   }
 
-  void initProperties() {
-    _triggerMode = switch (widget.controller) {
-      null => widget.triggerMode ?? FlutterTooltipTriggerMode.longPress,
-      _ => widget.triggerMode,
-    };
-
-    _dismissMode = switch (widget.controller) {
-      null => widget.dismissMode ?? FlutterTooltipDismissMode.tapAnyWhere,
-      _ => widget.dismissMode,
-    };
-  }
-
   @override
   Widget build(BuildContext context) {
     return CompositedTransformTarget(
       link: _layerLink,
-      child: GestureDetector(
-        onTap: switch (_triggerMode) {
-          FlutterTooltipTriggerMode.tap => _controller.toggle,
-          _ => null,
-        },
-        onLongPress: switch (_triggerMode) {
-          FlutterTooltipTriggerMode.longPress => _controller.toggle,
-          _ => null,
-        },
-        onDoubleTap: switch (_triggerMode) {
-          FlutterTooltipTriggerMode.doubleTap => _controller.toggle,
-          _ => null,
-        },
-        child: SizedBox(key: key, child: widget.child),
-      ),
+      child: SizedBox(key: key, child: widget.child),
     );
   }
 
@@ -240,51 +160,42 @@ class _FlutterTooltipState extends State<FlutterTooltip> with SingleTickerProvid
     };
 
     final Offset messageBoxOffset = switch (builder.targetAnchor) {
-      Alignment.bottomCenter => Offset(builder.offset.dx, widget.triangleSize.height + (widget.targetPadding) - 1),
-      Alignment.topCenter => Offset(builder.offset.dx, -widget.triangleSize.height - (widget.targetPadding) + 1),
-      Alignment.centerLeft => Offset(-(widget.targetPadding) - widget.triangleSize.width + 1, builder.offset.dy),
-      Alignment.centerRight => Offset((widget.targetPadding) + widget.triangleSize.width - 1, builder.offset.dy),
+      Alignment.bottomCenter => Offset(builder.offset.dx, widget.triangleSize.height + (widget.targetPadding)),
+      Alignment.topCenter => Offset(builder.offset.dx, -widget.triangleSize.height - (widget.targetPadding)),
+      Alignment.centerLeft => Offset(-(widget.targetPadding) - widget.triangleSize.width, builder.offset.dy),
+      Alignment.centerRight => Offset((widget.targetPadding) + widget.triangleSize.width, builder.offset.dy),
       _ => Offset.zero,
     };
 
     _overlayEntry = OverlayEntry(
       builder: (context) {
-        return FadeTransition(
-          opacity: _animation,
-          child: GestureDetector(
-            behavior: switch (_dismissMode) {
-              FlutterTooltipDismissMode.tapAnyWhere => HitTestBehavior.opaque,
-              FlutterTooltipDismissMode.tapInside => HitTestBehavior.deferToChild,
-              _ => HitTestBehavior.deferToChild,
-            },
-            onTap: switch (_dismissMode) {
-              FlutterTooltipDismissMode.tapAnyWhere => _controller.dismiss,
-              FlutterTooltipDismissMode.tapInside => _controller.dismiss,
-              _ => null,
-            },
-            child: Stack(
-              children: [
-                const SizedBox.expand(),
-                CompositedTransformFollower(
-                  link: _layerLink,
-                  targetAnchor: builder.targetAnchor,
-                  followerAnchor: builder.followerAnchor,
-                  offset: messageBoxOffset,
-                  child: builder.messageBox,
+        return Stack(
+          children: [
+            const SizedBox.expand(),
+            CompositedTransformFollower(
+              link: _layerLink,
+              targetAnchor: builder.targetAnchor,
+              followerAnchor: builder.followerAnchor,
+              offset: triangleOffset,
+              child: FadeTransition(
+                opacity: _animation,
+                child: SizedBox.fromSize(
+                  size: widget.triangleSize,
+                  child: triangle,
                 ),
-                CompositedTransformFollower(
-                  link: _layerLink,
-                  targetAnchor: builder.targetAnchor,
-                  followerAnchor: builder.followerAnchor,
-                  offset: triangleOffset,
-                  child: SizedBox.fromSize(
-                    size: widget.triangleSize,
-                    child: triangle,
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
+            CompositedTransformFollower(
+              link: _layerLink,
+              targetAnchor: builder.targetAnchor,
+              followerAnchor: builder.followerAnchor,
+              offset: messageBoxOffset,
+              child: FadeTransition(
+                opacity: _animation,
+                child: builder.messageBox,
+              ),
+            ),
+          ],
         );
       },
     );
@@ -296,9 +207,8 @@ class _FlutterTooltipState extends State<FlutterTooltip> with SingleTickerProvid
     }
   }
 
-  void dismiss() async {
+  void dismiss() {
     if (_overlayEntry != null) {
-      await _animationController.reverse();
       _overlayEntry?.remove();
       _overlayEntry = null;
       widget.onDismiss?.call();
@@ -343,16 +253,16 @@ class _FlutterTooltipState extends State<FlutterTooltip> with SingleTickerProvid
     Alignment targetAnchor = switch (widget.axis) {
       Axis.horizontal when isRight => Alignment.centerLeft,
       Axis.horizontal when isLeft => Alignment.centerRight,
-      Axis.vertical when isTop => Alignment.bottomCenter,
-      Axis.vertical when isBottom => Alignment.topCenter,
+      Axis.vertical when isTop => Alignment.topCenter,
+      Axis.vertical when isBottom => Alignment.bottomCenter,
       _ => Alignment.center,
     };
 
     Alignment followerAnchor = switch (widget.axis) {
       Axis.horizontal when isRight => Alignment.centerRight,
       Axis.horizontal when isLeft => Alignment.centerLeft,
-      Axis.vertical when isTop => Alignment.topCenter,
-      Axis.vertical when isBottom => Alignment.bottomCenter,
+      Axis.vertical when isTop => Alignment.bottomCenter,
+      Axis.vertical when isBottom => Alignment.topCenter,
       _ => Alignment.center,
     };
 
@@ -402,7 +312,7 @@ class _FlutterTooltipState extends State<FlutterTooltip> with SingleTickerProvid
     );
   }
 
-  Size _textSize(String text, TextStyle? style, double maxWidth) {
+  Size _textSize(String text, TextStyle style, double maxWidth) {
     final TextPainter textPainter = TextPainter(
       text: TextSpan(text: text, style: style),
       textDirection: TextDirection.ltr,

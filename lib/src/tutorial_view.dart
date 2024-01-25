@@ -128,7 +128,7 @@ class _TutorialViewState extends State<TutorialView> {
       bottom: bottom,
       left: left,
       right: right,
-      child: FlutterTooltip(
+      child: TooltipWidget(
         key: UniqueKey(),
         controller: controller,
         targetPadding: 4,
