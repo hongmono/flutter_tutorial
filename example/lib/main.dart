@@ -80,7 +80,7 @@ class _HomePageState extends State<HomePage> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Tutorial.of(context)
-            ..tooltipConfig = TooltipConfig(axis: Axis.horizontal)
+            ..tooltipConfig = TooltipConfig(axis: Axis.vertical)
             ..start(
               [
                 [const TutorialMessage(message: 'hi')],

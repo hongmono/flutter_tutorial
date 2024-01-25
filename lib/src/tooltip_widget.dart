@@ -228,8 +228,8 @@ class _TooltipWidgetState extends State<TooltipWidget> with SingleTickerProvider
     final targetCenterPosition = Offset(targetPosition.dx + targetSize.width / 2, targetPosition.dy + targetSize.height / 2);
     final bool isLeft = targetCenterPosition.dx <= MediaQuery.of(context).size.width / 2;
     final bool isRight = targetCenterPosition.dx > MediaQuery.of(context).size.width / 2;
-    final bool isBottom = targetCenterPosition.dy > MediaQuery.of(context).size.height / 2;
-    final bool isTop = targetCenterPosition.dy <= MediaQuery.of(context).size.height / 2;
+    final bool isTop = targetCenterPosition.dy > MediaQuery.of(context).size.height / 2;
+    final bool isBottom = targetCenterPosition.dy <= MediaQuery.of(context).size.height / 2;
 
     final deviceWidth = MediaQuery.of(context).size.width;
     final remainWidth = switch (widget.axis) {
