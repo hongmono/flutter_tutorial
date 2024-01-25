@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 class UpperTriangle extends StatelessWidget {
@@ -29,14 +31,21 @@ class UpperTrianglePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint()
       ..color = backgroundColor
-      ..strokeWidth = 5.0
-      ..strokeJoin = StrokeJoin.round
+      ..strokeWidth = 1.0
       ..style = PaintingStyle.fill
       ..strokeCap = StrokeCap.round;
 
+    double a = size.width / 2;
+    double b = size.height;
+    double r = 2;
+
+    double p = (b * r) / sqrt(b * b + a * a);
+    double q = -(b * b * sqrt(b * b + a * a) * r - a * b * b * b - a * a * a * b) / (a * b * b + a * a * a);
+
     final path = Path();
-    path.moveTo(size.width, size.height); // 오른쪽 아래
-    path.lineTo(size.width / 2, 0); // 꼭대기
+    path.moveTo(a + a, size.height); // 오른쪽 아래
+    path.lineTo(a + p, size.height - q);
+    path.arcToPoint(Offset(a - p, size.height - q), radius: Radius.circular(r), clockwise: false);
     path.lineTo(0, size.height); // 왼쪽 아래
     path.close();
 
