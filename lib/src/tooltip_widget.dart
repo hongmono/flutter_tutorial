@@ -39,6 +39,7 @@ class TooltipWidget extends StatefulWidget {
     required this.messageStyle,
     required this.padding,
     required this.axis,
+    this.alignment,
   });
 
   /// Message
@@ -79,6 +80,9 @@ class TooltipWidget extends StatefulWidget {
 
   /// Axis
   final Axis axis;
+
+  /// Alignment
+  final Alignment? alignment;
 
   @override
   State<TooltipWidget> createState() => _TooltipWidgetState();
@@ -143,7 +147,7 @@ class _TooltipWidgetState extends State<TooltipWidget> with SingleTickerProvider
       return;
     }
 
-    final Widget triangle = switch (builder.targetAnchor) {
+    final Widget triangle = switch (widget.alignment ?? builder.targetAnchor) {
       Alignment.bottomCenter => UpperTriangle(backgroundColor: widget.triangleColor),
       Alignment.topCenter => DownTriangle(backgroundColor: widget.triangleColor),
       Alignment.centerLeft => RightTriangle(backgroundColor: widget.triangleColor),
@@ -151,7 +155,7 @@ class _TooltipWidgetState extends State<TooltipWidget> with SingleTickerProvider
       _ => const SizedBox.shrink(),
     };
 
-    final Offset triangleOffset = switch (builder.targetAnchor) {
+    final Offset triangleOffset = switch (widget.alignment ?? builder.targetAnchor) {
       Alignment.bottomCenter => Offset(0, widget.targetPadding),
       Alignment.topCenter => Offset(0, -(widget.targetPadding)),
       Alignment.centerLeft => Offset(-(widget.targetPadding), 0),
@@ -159,12 +163,22 @@ class _TooltipWidgetState extends State<TooltipWidget> with SingleTickerProvider
       _ => Offset.zero,
     };
 
-    final Offset messageBoxOffset = switch (builder.targetAnchor) {
+    final Offset messageBoxOffset = switch (widget.alignment ?? builder.targetAnchor) {
       Alignment.bottomCenter => Offset(builder.offset.dx, widget.triangleSize.height + (widget.targetPadding)),
       Alignment.topCenter => Offset(builder.offset.dx, -widget.triangleSize.height - (widget.targetPadding)),
       Alignment.centerLeft => Offset(-(widget.targetPadding) - widget.triangleSize.width, builder.offset.dy),
       Alignment.centerRight => Offset((widget.targetPadding) + widget.triangleSize.width, builder.offset.dy),
       _ => Offset.zero,
+    };
+
+    final Alignment targetAnchor = widget.alignment ?? builder.targetAnchor;
+
+    final Alignment followerAnchor = switch (widget.alignment ?? builder.targetAnchor) {
+      Alignment.bottomCenter => Alignment.topCenter,
+      Alignment.topCenter => Alignment.bottomCenter,
+      Alignment.centerLeft => Alignment.centerRight,
+      Alignment.centerRight => Alignment.centerLeft,
+      _ => Alignment.center,
     };
 
     _overlayEntry = OverlayEntry(
@@ -174,8 +188,8 @@ class _TooltipWidgetState extends State<TooltipWidget> with SingleTickerProvider
             const SizedBox.expand(),
             CompositedTransformFollower(
               link: _layerLink,
-              targetAnchor: builder.targetAnchor,
-              followerAnchor: builder.followerAnchor,
+              targetAnchor: targetAnchor,
+              followerAnchor: followerAnchor,
               offset: triangleOffset,
               child: FadeTransition(
                 opacity: _animation,
@@ -187,8 +201,8 @@ class _TooltipWidgetState extends State<TooltipWidget> with SingleTickerProvider
             ),
             CompositedTransformFollower(
               link: _layerLink,
-              targetAnchor: builder.targetAnchor,
-              followerAnchor: builder.followerAnchor,
+              targetAnchor: targetAnchor,
+              followerAnchor: followerAnchor,
               offset: messageBoxOffset,
               child: FadeTransition(
                 opacity: _animation,

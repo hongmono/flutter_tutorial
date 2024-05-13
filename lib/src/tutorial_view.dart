@@ -53,7 +53,8 @@ class _TutorialViewState extends State<TutorialView> {
 
     final List<Message> message = messages.removeAt(0);
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Future.delayed(const Duration(milliseconds: 50));
       controller.show();
     });
 
@@ -140,6 +141,7 @@ class _TutorialViewState extends State<TutorialView> {
         padding: message.tooltipConfig?.padding ?? widget.tooltipConfig.padding,
         axis: message.tooltipConfig?.axis ?? widget.tooltipConfig.axis,
         message: message.message,
+        alignment: message.tooltipConfig?.alignment,
         child: IgnorePointer(ignoring: true, child: child ?? const SizedBox.shrink()),
       ),
     );

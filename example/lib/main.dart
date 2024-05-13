@@ -91,6 +91,7 @@ class _HomePageState extends State<HomePage> {
                     targetKey: fourthKey,
                     message:
                         'this is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth itemthis is a fourth item',
+                    tooltipConfig: TooltipConfig(alignment: Alignment.bottomCenter),
                   ),
                   TutorialItemMessage(
                     targetKey: thirdKey,

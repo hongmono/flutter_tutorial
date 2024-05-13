@@ -61,6 +61,7 @@ class TooltipConfig {
     this.triangleSize = const Size(10, 10),
     this.padding = const EdgeInsets.all(24),
     this.axis = Axis.vertical,
+    this.alignment,
   });
 
   /// Message Box padding
@@ -95,6 +96,9 @@ class TooltipConfig {
   ///
   /// Default: `Axis.vertical`
   Axis axis;
+
+  /// Alignment
+  Alignment? alignment;
 }
 
 class HeroDialogRoute<T> extends PageRoute<T> {
